@@ -2,20 +2,20 @@ package Droids;
 
 public class WizardDroid extends BaseDroid{
     public WizardDroid(String name){
-        this.name = name;
-        healthPoints = 200;
-        attackPoints = 30;
-        speedPoints = 50;
-        criticalDamageChance = 10;
-        dodgeChance = 10;
+        super(name, 200, 30, 50, 10,10);
     }
 
     @Override
-    protected void reset() {
-        healthPoints = 200;
-        attackPoints = 30;
-        speedPoints = 50;
-        criticalDamageChance = 10;
-        dodgeChance = 10;
+    public void attack(BaseDroid[] enemyTeam) {
+        var targets = getEnemiesWithMinHealth(2,enemyTeam);
+        if (targets.length == 1)
+            printAttackMessage(targets[0],attackPoints*2);
+        else
+            for (var enemy: targets)
+                printAttackMessage(enemy,attackPoints);
+
+        for (var enemy:enemyTeam)
+            if (!enemy.isAlive)
+                printKillMessage(enemy);
     }
 }
