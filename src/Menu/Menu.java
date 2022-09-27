@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import Battles.Battles;
-import ConsoleColors.ConsoleColors;
+
 
 import Droids.*;
 import FileWorks.FileWorks;
@@ -16,7 +16,7 @@ public class Menu {
     private FileWorks fileWorks;
 
     public Menu(){
-        System.out.println("введіть шлях до файлу для запису бою");
+        System.out.println("Введіть шлях до файлу для запису бою");
         var path = input.next();
         fileWorks = new FileWorks(path);
         Battles.fileWorks = fileWorks;
@@ -55,7 +55,7 @@ public class Menu {
                         System.out.println("Створена недостання кількість дроїдів!");
                         break;
                     }
-                    var droidsParticipants = chooseDroidsForTeamFigth(3);
+                    var droidsParticipants = chooseDroidsForTeamFight(3);
                     Battles.fileWorks.reset();
                     Battles.threeVsThree(droidsParticipants[0], droidsParticipants[1]);
                     Battles.fileWorks.close();
@@ -141,7 +141,7 @@ public class Menu {
         return result;
     }
 
-    private BaseDroid[][] chooseDroidsForTeamFigth(int count){
+    private BaseDroid[][] chooseDroidsForTeamFight (int count){
         int[] used = new int[2*count];
         var result = new BaseDroid[2][count];
         int maxCount = droids.size();
