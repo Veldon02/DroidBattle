@@ -1,5 +1,8 @@
 package Droids;
 
+import ConsoleColors.ConsoleColors;
+import FileWorks.FileWorks;
+
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -10,15 +13,18 @@ public abstract class BaseDroid {
     protected final int DEFAULTSPEEDPOINTS;
     protected final int DEFAULTCRITICALDAMAGECHANCE;
     protected final int DEFAULTDODGECHANCE;
+    protected String type;
     protected int healthPoints;
     protected int attackPoints;
     protected int speedPoints;
     protected int criticalDamageChance;
     protected int dodgeChance;
     protected boolean isAlive;
+    protected FileWorks fileWorks;
 
-    protected BaseDroid(String name, int healthPoints, int attackPoints,
-                        int speedPoints, int criticalDamageChance, int dodgeChance) {
+    protected BaseDroid(String type, String name, int healthPoints, int attackPoints,
+                        int speedPoints, int criticalDamageChance, int dodgeChance,FileWorks fileWorks) {
+        this.type = type;
         this.name = name;
         DEFAULTHEALTHPOINTS = healthPoints;
         this.healthPoints = healthPoints;
@@ -30,6 +36,7 @@ public abstract class BaseDroid {
         this.criticalDamageChance = criticalDamageChance;
         DEFAULTDODGECHANCE = dodgeChance;
         this.dodgeChance = dodgeChance;
+        this.fileWorks = fileWorks;
         isAlive = true;
     }
 
@@ -58,6 +65,9 @@ public abstract class BaseDroid {
     }
     public boolean getIsAlive() {
         return isAlive;
+    }
+    public String getType() {
+        return type;
     }
 
     protected boolean getDamage(int damage){
@@ -94,15 +104,20 @@ public abstract class BaseDroid {
         int aliveEnemies = 0;
         for (var enemy: enemyTeam)
             if (enemy.isAlive) aliveEnemies++;
-
+        if (aliveEnemies == 0) return null;
         if (aliveEnemies<count) count = aliveEnemies;
 
         var sortedList = Arrays.stream(enemyTeam)
                 .sorted(Comparator.comparingInt(BaseDroid::getHealthPoints)).toArray();
 
         var result = new BaseDroid[count];
+        int j = 0;
         for(int i = 0; i < count; i++){
-            result[i] = (BaseDroid)sortedList[i];
+            while(true){
+                if (!((BaseDroid)sortedList[i+j]).isAlive) j++;
+                else break;
+            }
+            result[i] = (BaseDroid)sortedList[i+j];
         }
         return result;
     }
@@ -112,33 +127,41 @@ public abstract class BaseDroid {
         if (crit) damage*=2;
         if (enemy.getDamage(damage)) {
             if (damage % 10 == 1)
-                System.out.println("Дроїд " + enemy.getName() + " отримав " + damage + " шкоду від дроїда " + name);
+                print("Дроїд " + enemy.getName() + " отримав " + damage + " шкоду від дроїда " + name);
             else
-                System.out.println("Дроїд " + enemy.getName() + " отримав " + damage + " шкоди від дроїда " + name);
+                print("Дроїд " + enemy.getName() + " отримав " + damage + " шкоди від дроїда " + name);
             if (crit)
-                System.out.println("Це критичний удар!");
+                print(ConsoleColors.RED_UNDERLINED + "Це критичний удар!" + ConsoleColors.RESET);
         }
         else
-            System.out.println("Дроїд " + enemy.getName() + " ухилився від атаки дроїда " + name);
+            print(ConsoleColors.BLUE_BOLD_BRIGHT + "Дроїд " + enemy.getName() + " ухилився від атаки дроїда " + name + ConsoleColors.RESET);
     }
 
     protected void printKillMessage(BaseDroid enemy){
-        System.out.println("Дроїд " + enemy.getName() + " був убитий дроїдом " + name);
+        print(ConsoleColors.RED + name + " вбив дроїда " + enemy.getName() + ConsoleColors.RESET);
     }
 
     public void attack(BaseDroid[] enemyTeam){
-        var enemy = getEnemiesWithMinHealth(1,enemyTeam)[0];
+        var sortedEnemies = getEnemiesWithMinHealth(1,enemyTeam);
+        if (sortedEnemies == null) return;
+        BaseDroid enemy = sortedEnemies[0];
         printAttackMessage(enemy,attackPoints);
         if (!enemy.isAlive)
             printKillMessage(enemy);
     }
 
-    protected void reset(){
+    public void reset(){
         healthPoints = DEFAULTHEALTHPOINTS;
         attackPoints = DEFAULTATTACKPOINTS;
         speedPoints = DEFAULTSPEEDPOINTS;
         criticalDamageChance = DEFAULTCRITICALDAMAGECHANCE;
         dodgeChance = DEFAULTDODGECHANCE;
+        isAlive = true;
+    }
+
+    protected void print(String message){
+        System.out.println(message);
+        fileWorks.print(message);
     }
 
 }
